@@ -1,0 +1,91 @@
+body {
+    background-color: #ddd;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+.student_info {
+    font-size: 25px;
+}
+
+.student_info span {
+    padding: 5px;
+}
+
+.question_list .que_op{
+    font-size: 25px;
+    font-family: Arial, Helvetica, sans-serif;
+    border-bottom: 3px dotted #fff;   
+    padding: 15px 5px 15px 5px;
+    margin: 15px 0 15px 0;
+}
+
+.que_op ol{
+    padding: 0px;
+}
+
+.que_op .text img{
+    border: 2px solid #fff;
+    padding: 4px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+}
+
+
+.que_op .quelist_i{
+    margin: 15px 5px 15px 5px;
+}
+
+.que_op .option li label{
+    cursor: pointer;
+}
+
+.que_op .option li label img,.que_op img {
+    min-width: 50%;
+    min-height: auto;
+}
+
+.que_op .option li label input[type="radio"]{
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+
+.que_op .option li {
+    padding: 5px 5px 5px 5px;
+}
+
+.que_op .option li:hover {
+    background-color: darkgrey;
+    border-radius: 15px;
+}
+
+.chinese-list {
+    counter-reset: list-number;
+    list-style: none;
+}
+
+.chinese-list li.que_op {
+    counter-increment: list-number;
+    position: relative;
+}
+
+.chinese-list li.que_op::before {
+    content: counter(list-number, cjk-ideographic) ". ";
+    position: absolute;
+    left: -1em;
+    top: -0.5em;
+}
+
+.quelist_i {
+    list-style: none;
+}
+
+
+@media (max-width:780px) {
+    .que_op .option li label img,.que_op img {
+        min-width: 100%;
+        min-height: auto;
+    }
+}
