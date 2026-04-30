@@ -1,6 +1,7 @@
 <?php
     require_once 'models/TeacherModel.php';
     require_once 'views/TeacherView.php';
+    require_once 'views/RQuizView.php';
     session_start();
     class TeacherController {
         private $model;
@@ -36,34 +37,6 @@
                 $editstudentData = $this->model->geteditstudentData($_GET['studentid']);
                 $showstudentclassData =  $this->model->getshowexamclassData();
                 return $view -> render($data,$ShowExamList,$editstudentData,$showstudentclassData);
-            }
-
-            if (isset($_GET['p']) && $_GET['p'] === 'question') {
-                $questionSets = $this->model->getQuestionSet();
-                $examData = [];
-
-                // 將大題、小題和選項組裝成巢狀資料結構
-                foreach ($questionSets as $questionSet) {
-                    $questionSetId = $questionSet['id'];
-                    $questions = $this->model->getQuestions($questionSetId);
-                    $questionsData = [];
-
-                    foreach ($questions as $question) {
-                        $questionId = $question['id'];
-                        $options = $this->model->getOptions($questionId);
-
-                        $questionsData[] = [
-                            'question' => $question,
-                            'options' => $options,
-                        ];
-                    }
-
-                    $examData[] = [
-                        'questionSet' => $questionSet,
-                        'questions' => $questionsData,
-                    ];
-                }
-                return $view->render($data,$examData,'','');
             }
 
             if (isset($_GET['p']) && $_GET['p'] === 'add_student') {
@@ -132,6 +105,55 @@
 
         public function editteacherData($username, $password, $id){
             $this ->model->teacheredit($username, $password, $id);
+        }
+
+        // 檢視學生考試題目
+        public function readquiz() {
+            // 1. 取得 Exam ID 並進行基本的安全過濾
+            $examId = $_GET['examid'] ?? null;
+            if (!$examId) {
+                die("缺少考試編號");
+            }
+
+            // 2. 呼叫 Model 取得該場考試的基礎資訊（包含解析後的錯題 JSON）
+            $examInfo = $this->model->getExamBasicInfo($examId);
+            $errorJson = $examInfo['error_questions_json'];
+            $studentData =$this->model->geteditstudentData($examInfo['student_id']??'');
+
+            // 3. 根據 JSON 內容取得大題清單
+            $questionSets = $this->model->getQuestionSetsByJson($errorJson);
+            
+            $examData = [];
+
+            // 4. 組裝大題、小題與選項
+            foreach ($questionSets as $questionSet) {
+                $setId = $questionSet['id'];
+                
+                // 取得該大題下，記錄在 JSON 中的小題
+                $questions = $this->model->getQuestionsByJson($setId, $errorJson);
+                $questionsData = [];
+
+                foreach ($questions as $question) {
+                    $queId = $question['id'];
+                    // 取得選項 (Model 內已修正 bind_param 傳值問題)
+                    $options = $this->model->getOptions($queId);
+
+                    $questionsData[] = [
+                        'question' => $question,
+                        'options' => $options,
+                    ];
+                }
+
+                $examData[] = [
+                    'questionSet' => $questionSet,
+                    'questions' => $questionsData,
+                ];
+            }
+
+            // 5. 渲染頁面
+            $view = new RQuizView();
+            // 傳遞組裝好的資料以及可能的學生細節 (若 Model 有提供)
+            $view->render($examData, $studentData);
         }
 
         // 登出

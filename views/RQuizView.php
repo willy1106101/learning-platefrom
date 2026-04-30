@@ -1,6 +1,6 @@
 <?php
-    class QuizView {
-        public function render($data, $examData, $question_ids, $quetype) {
+    class RQuizView {
+        public function render($examData,$data) {
 ?>
 <style>
     body {
@@ -121,8 +121,8 @@
         <div class="info-header d-flex justify-content-between align-items-center">
             <h2 class="fw-bold m-0 text-success"><i class="bi bi-journal-check me-2"></i>測驗卷</h2>
             <div class="d-flex gap-2">
-                <span class="info-tag">姓名：<?php echo $_SESSION['name'] ?? ""; ?></span>
-                <span class="info-tag">學號：<?php echo $_SESSION['stdId'] ?? ""; ?></span>
+                <span class="info-tag">姓名：<?php echo $data['name'] ?? ""; ?></span>
+                <span class="info-tag">學號：<?php echo $data['stdId'] ?? ""; ?></span>
                 <span class="info-tag">題數：共<?php print_r(count($examData));?>題</span>
                 <input type="hidden" value="<?php echo $quetype ?? "";?>">
             </div>
@@ -168,8 +168,7 @@
             </ul>
 
             <div class="action-bar">
-                <input type="submit" id="subAns" class="btn btn-success btn-lg px-5 shadow-sm" value="確認交卷" onclick="return confirm('確定要交卷嗎?');">
-                <button type="button" class="btn btn-outline-danger btn-lg px-4" id="subAns1" onclick="if(confirm('確定要離開嗎?')){location.href='./requiz?r=1';}">取消作答</button>
+                <button type="button" class="btn btn-outline-danger btn-lg px-4" id="subAns1" onclick="location.href='./requiz?r=1';">返回</button>
                 <button type="button" class="btn btn-dark shadow-sm rounded-pill px-4 py-2 position-fixed" 
                         style="bottom: 80px; right: 20px; z-index: 1050;" 
                         data-bs-toggle="modal" data-bs-target="#jumpToQuestionModal">
@@ -178,20 +177,6 @@
             </div>
         </form>
 
-        <div id="requiz" class="mt-5 pt-4 border-top text-center" style="display:none;">
-            <?php if($question_ids !== '' && $question_ids !== '[]' && empty($_SESSION['renewtest'])): 
-                $encoded_ids = base64_encode(json_encode($question_ids)); ?>
-                <button class="btn btn-info text-white px-4 py-2 shadow-sm" onclick="location.href='./requiz?lastque=<?php echo $encoded_ids;?>';">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i> 錯誤題目再做一次
-                </button>
-            <?php endif; ?>
-            
-            <?php if(isset($_GET['examid'])): ?>
-                <button class="btn btn-danger px-4 py-2 shadow-sm ms-2" onclick="location.href='./requiz?r=2&examid=<?php echo $_GET['examid']; ?>';">重新作答</button>
-            <?php endif; ?>
-            
-            <button class="btn btn-secondary px-4 py-2 shadow-sm ms-2" onclick="location.href='./requiz?r=1';">返回首頁</button>
-        </div>
     </div>
 </div>
 <div class="modal fade" id="jumpToQuestionModal" tabindex="-1" aria-hidden="true">
@@ -281,13 +266,7 @@
         if ((e.ctrlKey && e.key === 'c') || e.key === 'F12') e.preventDefault();
     });
 
-
-    if(errorQuestions && Object.keys(errorQuestions).length > 0){
-        document.querySelector("#subAns")?.remove();
-        document.querySelector("#subAns1")?.remove();
-        document.querySelector("#requiz").style.display = "block";
-        document.querySelectorAll('input[type="radio"]').forEach(el => el.disabled = true);
-    }
+    document.querySelectorAll('input[type="radio"]').forEach(el => el.disabled = true);
 
     // 標示邏輯 (沿用您的優化版)
     const dataList = Array.isArray(errorQuestions) ? errorQuestions : [errorQuestions];

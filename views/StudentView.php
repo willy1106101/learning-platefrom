@@ -142,7 +142,7 @@
 
     <div class="table-container p-2">
         <div class="px-3 pt-3 pb-2">
-            <h6 class="fw-bold text-secondary"><i class="bi bi-clock-history me-2"></i>練習歷史紀錄</h6>
+            <h6 class="fw-bold text-secondary"><i class="bi bi-clock-history me-2"></i>練習歷史紀錄(練習次數: <?php echo count($showExamList);?>次)</h6>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">

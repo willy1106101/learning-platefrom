@@ -264,22 +264,137 @@ class TeacherModel {
         }
     }
 
-    // 顯示大題
-    public function getQuestionSet(){
-        $sql = "SELECT id, content, image_url,que_type FROM questionsets ORDER BY id";
-        return $this->db->query($sql)->fetch_all(MYSQLI_ASSOC);
+
+    public function getExamBasicInfo($examid) {
+        $questionset_id = '';
+        $error_questions_json = null;
+        
+        // 1. 使用預處理語句確保安全
+        $stmt = $this->db->prepare("SELECT answer, questionset_id,student_id FROM stdscores WHERE exam_id = ?");
+        if ($stmt) {
+            $stmt->bind_param("s", $examid);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($row = $result->fetch_assoc()) {
+                $raw_answer = $row['answer'] ?? ''; 
+                $questionset_id = $row['questionset_id'] ?? '';
+                $studentData =  $row['student_id']??'';
+                // 2. 解析 JSON (補上中括號以符合您資料庫的存儲格式)
+                if ($raw_answer !== '') {
+                    // 依照您目前的資料結構，將殘缺的 JSON 補上中括號後解析
+                    $parsed = json_decode('[' . $raw_answer . ']', true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $error_questions_json = $parsed;
+                    }
+                }
+            }
+            $stmt->close();
+        }
+
+        // 3. 【新增】將錯題資料輸出給前端 JavaScript
+        // 這樣 View 裡的標示邏輯才能抓到 errorQuestions 變數
+        $js_output_data = $error_questions_json ?? []; 
+        echo '<script>const errorQuestions = ' . json_encode($js_output_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';</script>';
+
+        return [
+            'questionset_id' => $questionset_id,
+            'error_questions_json' => $error_questions_json,
+            'student_id' => $studentData
+        ];
     }
 
-    // 顯示小題
-    public function getQuestions($questionSet=null) {
-        $questionSql = "SELECT id, question_text, correct_option FROM questions WHERE question_set_id = " . $questionSet . " ORDER BY id";
-        return $this->db->query($questionSql)->fetch_all(MYSQLI_ASSOC);
+    /**
+     * 2. 取得大題列表 (Questionsets)
+     */
+    public function getQuestionSetsByJson($error_questions_json) {
+        if (!is_array($error_questions_json)) return [];
+
+        $targetSetIds = [];
+        foreach ($error_questions_json as $item) {
+            foreach ($item as $key => $val) {
+                // 清除 "q." 取得數字 ID
+                $cleanId = intval(str_replace('q.', '', (string)$key));
+                if ($cleanId > 0) $targetSetIds[] = $cleanId;
+            }
+        }
+        $targetSetIds = array_unique($targetSetIds);
+
+        if (empty($targetSetIds)) return [];
+
+        $placeholders = implode(',', array_fill(0, count($targetSetIds), '?'));
+        $sql = "SELECT id, content, image_url FROM questionsets WHERE id IN ($placeholders) ORDER BY FIELD(id, $placeholders)";
+        
+        $stmt = $this->db->prepare($sql);
+        // 傳入兩次 $targetSetIds 為了 FIELD 排序，確保順序正確
+        $params = array_merge($targetSetIds, $targetSetIds);
+        $types = str_repeat('i', count($params));
+
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return $result;
     }
 
-    // 顯示選項
-    public function getOptions($question) {
-        $optionSql = "SELECT option_letter, option_text, option_image FROM options WHERE question_id = " . $question . " ORDER BY id";
-        return $this->db->query($optionSql)->fetch_all(MYSQLI_ASSOC);
+    /**
+     * 3. 取得指定大題內「有紀錄在 JSON 裡」的小題
+     */
+    public function getQuestionsByJson($setId, $error_questions_json) {
+        $cleanSetId = intval($setId);
+        $targetQueIds = [];
+
+        foreach ($error_questions_json as $item) {
+            foreach ($item as $qKey => $qVal) {
+                // 檢查是否為當前處理的大題
+                if (intval(str_replace('q.', '', (string)$qKey)) === $cleanSetId) {
+                    if (is_array($qVal)) {
+                        foreach ($qVal as $queId => $info) {
+                            $targetQueIds[] = intval($queId);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (empty($targetQueIds)) return [];
+
+        $placeholders = implode(',', array_fill(0, count($targetQueIds), '?'));
+        $sql = "SELECT * FROM questions WHERE question_set_id = ? AND id IN ($placeholders) ORDER BY id";
+        
+        $stmt = $this->db->prepare($sql);
+        $params = array_merge([$cleanSetId], $targetQueIds);
+        $types = str_repeat('i', count($params));
+
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return $result;
+    }
+
+    /**
+     * 4. 取得選項
+     */
+    public function getOptions($questionId) {
+        // 錯誤原因：bind_param 不接受直接傳入函式處理後的「值」
+        // 解決方法：先將處理後的 ID 存入一個變數
+        $cleanQuestionId = intval($questionId);
+
+        $stmt = $this->db->prepare("SELECT option_letter, option_text, option_image FROM options WHERE question_id = ? ORDER BY id");
+        
+        if ($stmt) {
+            // 現在傳入的是 $cleanQuestionId 變數，這樣就不會報錯了
+            $stmt->bind_param("i", $cleanQuestionId);
+            $stmt->execute();
+            $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+            return $result;
+        }
+        
+        return [];
     }
 
     public function __destruct() {

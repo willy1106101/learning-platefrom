@@ -442,6 +442,7 @@
                             <th class="border-0">學生班級</th>
                             <th class="border-0 text-center">總成績</th>
                             <th class="border-0 ps-4">作答時間</th>
+                            <th class="border-0 ps-4">查看</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -453,6 +454,11 @@
                                         <td><span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 fw-normal">'.htmlspecialchars($row['classname']).'</span></td>
                                         <td class="text-center"><span class="h5 m-0 fw-bold text-success">'.htmlspecialchars($row['score']).'</span> <small class="text-muted">分</small></td>
                                         <td class="ps-4 text-muted small">'.htmlspecialchars($row['quiztime']).'</td>
+                                        <td class="text-center">
+                                            <a class="text-decoration-none view-link" href="./readquiz?examid=' . $row['exam_id'] . '">
+                                                <i class="bi bi-eye me-1"></i>查看
+                                            </a>
+                                        </td>
                                     </tr>';
                                 }
                             } else {
