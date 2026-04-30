@@ -20,15 +20,28 @@
 
             $data = $this->model->getUserData($_SESSION['id']);
             $ShowExamList = $this->model->showExamList($_GET['p']??'');
+
+            // 2. 【新增】抓取每一筆考試的分析報告
+            $allReports = [];
+            if (!empty($ShowExamList)) {
+                foreach ($ShowExamList as $exam) {
+                    if(isset($exam['exam_id'])){
+                        $eid = $exam['exam_id'];
+                        // 呼叫單場分析方法，並將結果存入以 exam_id 為索引的陣列
+                        $allReports[$eid] = $this->model->getSingleExamReport($exam['student_id'], $eid);
+                    }
+                }
+            }
+
             if (isset($_GET['classid'])) {
                 $editclassData = $this->model->geteditclassData($_GET['classid']);
-                return $view -> render($data,$ShowExamList,$editclassData,'');
+                return $view -> render($data,$ShowExamList,$editclassData,'','');
             }
 
             if (isset($_GET['examid'])) {
                 $editexamData = $this->model->geteditexamData($_GET['examid']);
                 $showexamclassData =  $this->model->getshowexamclassData();
-                return $view -> render($data,$ShowExamList,$editexamData,$showexamclassData);
+                return $view -> render($data,$ShowExamList,$editexamData,$showexamclassData,'');
             }
             
             
@@ -36,15 +49,15 @@
             if (isset($_GET['studentid'])) {
                 $editstudentData = $this->model->geteditstudentData($_GET['studentid']);
                 $showstudentclassData =  $this->model->getshowexamclassData();
-                return $view -> render($data,$ShowExamList,$editstudentData,$showstudentclassData);
+                return $view -> render($data,$ShowExamList,$editstudentData,$showstudentclassData,'');
             }
 
             if (isset($_GET['p']) && $_GET['p'] === 'add_student') {
                 $showexamclassData =  $this->model->getshowexamclassData();
-                return $view -> render($data,$ShowExamList,'',$showexamclassData);
+                return $view -> render($data,$ShowExamList,'',$showexamclassData,'');
             }
 
-            $view->render($data,$ShowExamList,'','');
+            $view->render($data,$ShowExamList,'','', $allReports);
         }
         
         // 班級

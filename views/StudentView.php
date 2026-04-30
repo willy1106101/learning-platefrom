@@ -1,6 +1,6 @@
 <?php
     class StudentView {
-        public function render($data,$showExamList,$ShowExamQuetypeList) {
+        public function render($data,$showExamList,$ShowExamQuetypeList, $allReports) {
 ?>
 <style>
     :root {
@@ -157,6 +157,8 @@
                     <?php
                         if (!empty($showExamList)) {
                             foreach ($showExamList as $row) {
+                                $eid = $row['exam_id'];
+                                $report = $allReports[$eid] ?? null;
                                 echo '<tr>
                                         <td class="ps-4 text-muted">' . htmlspecialchars($row['quiztime']) . '</td>
                                         <td class="text-center">
@@ -166,6 +168,10 @@
                                         </td>
                                         <td class="text-end pe-4">
                                             <span class="score-text">' . htmlspecialchars($row['score']) . ' 分</span>
+                                            <span class="badge bg-info ms-2">
+                                                正確率: ' . (100 - $report['rate']) . '% 
+                                                (錯 ' . $report['wrong'] . ' / 總 ' . $report['total'] . ')
+                                            </span>
                                         </td>
                                     </tr>';
                             }

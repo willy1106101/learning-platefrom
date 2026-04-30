@@ -1,6 +1,6 @@
 <?php
     class TeacherView {
-        public function render($data,$showExamList,$editexamdata,$showexamclassData) {
+        public function render($data,$showExamList,$editexamdata,$showexamclassData, $allReports) {
 ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
@@ -381,51 +381,6 @@
         </div>
 
         <?php
-            // 題目管理
-            }else if(isset($_GET['p']) && $_GET['p'] === 'question'){
-        ?>
-        <div class="col-lg-12">
-            <h4 class="fw-bold mb-4"><i class="bi bi-file-earmark-text me-2"></i>題目預覽管理</h4>
-            <div class="row g-4">
-                <?php
-                    foreach ($showExamList as $data) {
-                        $questionSet = $data['questionSet'];
-                        echo '<div class="col-12"><div class="que-op-card bg-white shadow-sm rounded-4 p-4 border-start border-success border-5">';
-                        echo '<div class="d-flex justify-content-between mb-3 align-items-start">';
-                        echo '<div class="fs-5 fw-bold text-dark pe-3">'.htmlspecialchars($questionSet['content']).'</div>';
-                        if(isset($questionSet['que_type'])){
-                            echo '<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill small flex-shrink-0">'.htmlspecialchars($questionSet['que_type']).'</span>';
-                        }
-                        echo '</div>';
-                        
-                        if (!empty($questionSet['image_url'])) {
-                            echo '<div class="mb-3 text-center bg-light rounded-3 p-2"><img src="../../' . htmlspecialchars($questionSet['image_url']) . '" class="img-fluid rounded-3" style="max-height: 250px;" alt="題目圖片" /></div>';
-                        }
-
-                        echo '<div class="question-items mt-4">';
-                        foreach ($data['questions'] as $questionData) {
-                            $question = $questionData['question'];
-                            echo '<div class="p-3 bg-light rounded-3 mb-3">';
-                            echo '<div class="fw-bold text-dark mb-3"><span class="text-success me-2">●</span>'.htmlspecialchars($question['question_text']).' <span class="text-danger ms-2 small">[解答：'.htmlspecialchars($question['correct_option']).']</span></div>';
-                            echo '<div class="row g-2">';
-                            foreach ($questionData['options'] as $option) {
-                                echo '<div class="col-md-6"><div class="option-item small bg-white p-2 px-3 rounded-2 border">';
-                                echo '<span class="fw-bold text-primary me-2">'.htmlspecialchars($option['option_letter']).'</span>';
-                                echo '<span>' . htmlspecialchars($option['option_text']) . '</span>';
-                                if (!empty($option['option_image'])) {
-                                    echo '<img src="../../' . htmlspecialchars($option['option_image']) . '" class="d-block mt-2 img-thumbnail" style="max-height: 80px;" />';
-                                }
-                                echo '</div></div>';
-                            }
-                            echo '</div></div>';
-                        }
-                        echo '</div></div></div>';
-                    }
-                ?>
-            </div>
-        </div>
-
-        <?php
             // 成績管理 (預設)
             }else {
         ?>
@@ -442,13 +397,15 @@
                             <th class="border-0">學生班級</th>
                             <th class="border-0 text-center">總成績</th>
                             <th class="border-0 ps-4">作答時間</th>
-                            <th class="border-0 ps-4">查看</th>
+                            <th class="border-0 ps-4 text-center">查看</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                             if (!empty($showExamList)) {
                                 foreach ($showExamList as $row) {
+                                    $eid = $row['exam_id'];
+                                    $report = $allReports[$eid] ?? null;
                                     echo '<tr>
                                         <td class="ps-4"><div class="d-flex align-items-center"><i class="bi bi-person-circle text-secondary me-2"></i>'.htmlspecialchars($row['name']).'</div></td>
                                         <td><span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 fw-normal">'.htmlspecialchars($row['classname']).'</span></td>
@@ -458,6 +415,10 @@
                                             <a class="text-decoration-none view-link" href="./readquiz?examid=' . $row['exam_id'] . '">
                                                 <i class="bi bi-eye me-1"></i>查看
                                             </a>
+                                            <span class="badge bg-info ms-2">
+                                                正確率: ' . (100 - $report['rate']) . '% 
+                                                (錯 ' . $report['wrong'] . ' / 總 ' . $report['total'] . ')
+                                            </span>
                                         </td>
                                     </tr>';
                                 }
