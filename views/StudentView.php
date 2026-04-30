@@ -140,12 +140,48 @@
         </form>
     </div>
 
+    <div class="card card-practice p-4 mb-4">
+        <h5 class="mb-4 fw-bold text-dark"><i class="bi bi-rocket-takeoff me-2 text-success"></i>開始錯題練習</h5>
+        <form action="./requiz" class="row g-3 align-items-end" method="post">
+            <div class="col-md-5">
+                <label class="form-label-custom">選擇練習章節</label>
+                <input type="hidden" name="questiontype" value= "errnewtest">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-bookmarks"></i></span>
+                    <select class="form-select border-0 bg-light" name="quetype">
+                        <option disabled selected>請選擇章節...</option>
+                        <?php
+                            if (!empty($ShowExamQuetypeList)) {
+                                echo '<option value="">全部章節</option>';
+                                foreach ($ShowExamQuetypeList as $quetypeRow) {
+                                    echo "<option value='" . $quetypeRow['id'] . "'>" . htmlspecialchars($quetypeRow['typename']) . "</option>";
+                                }
+                            } else {
+                                echo "<option value=''>沒有章節資料</option>";
+                            }
+                        ?>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label-custom">設定練習題數</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-list-ol"></i></span>
+                    <input type="number" class="form-control border-0 bg-light" name="questionnum" min="1" value="50">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-gradient-success w-100">開始練習</button>
+            </div>
+        </form>
+    </div>
+
     <div class="table-container p-2">
         <div class="px-3 pt-3 pb-2">
-            <h6 class="fw-bold text-secondary"><i class="bi bi-clock-history me-2"></i>練習歷史紀錄(練習次數: <?php echo count($showExamList);?>次)</h6>
+            <h6 class="fw-bold text-secondary"><i class="bi bi-clock-history me-2"></i>練習歷史紀錄(練習次數: <?php if ($showExamList) echo count($showExamList); else echo "0";?>次)</h6>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 mobile-list">
                 <thead>
                     <tr>
                         <th class="ps-4">考試時間</th>
@@ -186,6 +222,30 @@
         </div>
     </div>
 </div>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        // 抓取所有的響應式表格
+        const tables = document.querySelectorAll('.mobile-list');
+        
+        tables.forEach(table => {
+            // 抓取表頭文字內容
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+            
+            // 抓取每一行
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, index) => {
+                    // 如果對應的表頭文字存在，就自動填入 data-label
+                    if (headers[index]) {
+                        cell.setAttribute('data-label', headers[index]);
+                    }
+                });
+            });
+        });
+    });
+</script>
 <?php
         }
     }

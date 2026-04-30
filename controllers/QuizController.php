@@ -16,6 +16,7 @@
                 exit;
             }
             $data = $this->model->getUserData($_SESSION['user_id']);
+            $quizData = $this->model->getAllWrongQuestionsForExam($_SESSION['user_id'],$_SESSION['quetype']??null,$_SESSION['quenum']??'1');
             $getIsExamQue = $this ->model->getIsExamQue($_GET['examid']??null,$_SESSION['reexamid']??null,$_SESSION['error_questions']??null,$_SESSION['renewtest']??null,$_SESSION['quenum']??'1');
             $questionSets = $this->model->getQuestionSet($_SESSION['errorqueid']??null,$getIsExamQue['error_questions_json'],$getIsExamQue['setting_question_num'],$_SESSION['quetype']??null);
             $examData = [];
@@ -41,6 +42,7 @@
                     'questions' => $questionsData,
                 ];
             }
+            if(!empty($quizData) && !empty($_SESSION['student_id'])) $examData = $quizData;
             $view = new QuizView();
             $view->render($data,$examData,$getIsExamQue['question_ids'],$_SESSION['quetype']??null);
         }
@@ -50,8 +52,8 @@
             $this->model->check_exam_answer($user_id,$answer);
         }
         
-        public function requiz($r,$examid,$lastque,$questionnum,$quetype){
-            $this->model->requiz($r,$examid,$lastque,$questionnum,$quetype);
+        public function requiz($r,$examid,$lastque,$questionnum,$quetype,$questiontype){
+            $this->model->requiz($r,$examid,$lastque,$questionnum,$quetype,$questiontype);
         }
 
         // 登出

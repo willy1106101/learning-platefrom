@@ -323,7 +323,7 @@ class TeacherModel {
         if (empty($targetSetIds)) return [];
 
         $placeholders = implode(',', array_fill(0, count($targetSetIds), '?'));
-        $sql = "SELECT id, content, image_url FROM questionsets WHERE id IN ($placeholders) ORDER BY FIELD(id, $placeholders)";
+        $sql = "SELECT id, content, image_url, que_type FROM questionsets WHERE id IN ($placeholders) ORDER BY FIELD(id, $placeholders)";
         
         $stmt = $this->db->prepare($sql);
         // 傳入兩次 $targetSetIds 為了 FIELD 排序，確保順序正確

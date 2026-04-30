@@ -83,7 +83,25 @@ body {
 }
 
 
-@media (max-width:780px) {
+@media (max-width: 768px) {
+    .mobile-list thead { display: none; }
+    .mobile-list tr { display: block; border: 1px solid #ddd; margin-bottom: 10px; border-radius: 8px; }
+    .mobile-list td { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        border: none !important;
+        border-bottom: 1px solid #eee !important;
+        padding: 10px 15px !important;
+    }
+    
+    /* 自動抓取 data-label 屬性 */
+    .mobile-list td::before {
+        content: attr(data-label); 
+        font-weight: bold;
+        color: #777;
+    }
+
     .que_op .option li label img,.que_op img {
         min-width: 100%;
         min-height: auto;

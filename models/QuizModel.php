@@ -33,6 +33,158 @@ class QuizModel {
         return $user;
     }
 
+    public function getAllWrongQuestionsForExam($student_id,$que_type,$limit_que_num) {
+        if (empty($student_id)) {
+            return [];
+        }
+        /* =========================
+        * 1️⃣ 撈出所有 questionset_id
+        * ========================= */
+        $stmt = $this->db->prepare(
+            "SELECT questionset_id 
+            FROM stdscores 
+            WHERE student_id = ?
+            AND questionset_id IS NOT NULL
+            AND questionset_id != ''
+            LIMIT ?"
+             
+        );
+        $stmt->bind_param("ss", $student_id,$limit_que_num);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $setMap = [];   // questionset_id => [question_id...]
+
+        while ($row = $result->fetch_assoc()) {
+            $decoded = json_decode($row['questionset_id'], true);
+
+            if (!is_array($decoded)) continue;
+
+            foreach ($decoded as $setId => $qids) {
+                if (!isset($setMap[$setId])) {
+                    $setMap[$setId] = [];
+                }
+                foreach ((array)$qids as $qid) {
+                    $setMap[$setId][] = (int)$qid;
+                }
+            }
+        }
+        $stmt->close();
+
+        if (empty($setMap)) {
+            return [];
+        }
+
+        /* =========================
+        * 2️⃣ 撈題組資料
+        * ========================= */
+        $setIds = array_keys($setMap);
+        $inSet  = implode(',', array_fill(0, count($setIds), '?'));
+
+        $stmt = $this->db->prepare(
+            "SELECT id, content, image_url, que_type
+            FROM questionsets
+            WHERE id IN ($inSet) AND que_type = ?"
+        );
+        $params = array_merge($setIds, [(int)$que_type]);
+        $types = str_repeat('i', count($setIds)) . 'i'; 
+
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $questionSets = [];
+        while ($row = $result->fetch_assoc()) {
+            $questionSets[$row['id']] = [
+                'questionSet' => [
+                    'id'        => (string)$row['id'],
+                    'content'   => $row['content'],
+                    'image_url' => $row['image_url'],
+                    'que_type'  => $row['que_type'],
+                ],
+                'questions' => []
+            ];
+        }
+        $stmt->close();
+
+        /* =========================
+        * 3️⃣ 撈所有錯題 + 選項
+        * ========================= */
+        $allQids = [];
+        foreach ($setMap as $qids) {
+            foreach ($qids as $qid) {
+                $allQids[] = $qid;
+            }
+        }
+        $allQids = array_values(array_unique($allQids));
+
+        $inQ = implode(',', array_fill(0, count($allQids), '?'));
+
+        $stmt = $this->db->prepare(
+            "SELECT 
+                q.id AS qid,
+                q.question_set_id,
+                q.question_text,
+                q.correct_option,
+                o.option_letter,
+                o.option_text,
+                o.option_image
+            FROM questions q
+            LEFT JOIN options o ON o.question_id = q.id
+            WHERE q.id IN ($inQ)
+            ORDER BY q.question_set_id, q.id"
+        );
+        $stmt->bind_param(str_repeat('i', count($allQids)), ...$allQids);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $tempQuestions = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $qid = $row['qid'];
+
+            if (!isset($tempQuestions[$qid])) {
+                $tempQuestions[$qid] = [
+                    'setId'    => $row['question_set_id'],
+                    'question' => [
+                        'id'             => (string)$qid,
+                        'question_text'  => $row['question_text'],
+                        'correct_option' => $row['correct_option']
+                    ],
+                    'options' => []
+                ];
+            }
+
+            if ($row['option_letter']) {
+                $tempQuestions[$qid]['options'][] = [
+                    'option_letter' => $row['option_letter'],
+                    'option_text'   => $row['option_text'],
+                    'option_image'  => $row['option_image']
+                ];
+            }
+        }
+        $stmt->close();
+
+        /* =========================
+        * 4️⃣ 塞回題組
+        * ========================= */
+        foreach ($tempQuestions as $q) {
+            $setId = $q['setId'];
+
+            if (!isset($questionSets[$setId])) continue;
+
+            $questionSets[$setId]['questions'][] = [
+                'question' => $q['question'],
+                'options'  => $q['options']
+            ];
+        }
+
+        /* =========================
+        * 5️⃣ 最終輸出
+        * ========================= */
+        return array_values($questionSets);
+    }
+
     public function getIsExamQue($examid = null, $reexamid = null, $error_questions = null, $renewtest = null, $quenum = null) {
         // 初始化回傳變數
         $questionset_id = '';
@@ -116,7 +268,7 @@ class QuizModel {
                 return $id;  // 直接返回鍵名，不進行任何處理
             }, array_keys(json_decode($data,true)))); 
 
-            $sql = "SELECT id, content, image_url FROM questionsets WHERE id IN ($ids) ORDER BY id";
+            $sql = "SELECT id, content, image_url, que_type FROM questionsets WHERE id IN ($ids) ORDER BY id";
             
         // ----------------------------------------------------------------
         // 情境 2: 處理 $error_questions_json (考後檢閱)
@@ -163,7 +315,7 @@ class QuizModel {
             }
 
             $placeholders = implode(',', array_fill(0, count($errorqueIdsq), '?'));
-            $sql = "SELECT id, content, image_url FROM questionsets WHERE id IN ($placeholders) ORDER BY id";
+            $sql = "SELECT id, content, image_url, que_type FROM questionsets WHERE id IN ($placeholders) ORDER BY id";
             $params = $errorqueIdsq;
             $types = str_repeat('i', count($errorqueIdsq));
 
@@ -412,9 +564,9 @@ class QuizModel {
         }
     }
 
-    public function requiz($r = null, $examid = null, $lastque = null, $questionnum = null, $quetype = null) {
+    public function requiz($r = null, $examid = null, $lastque = null, $questionnum = null, $quetype = null, $questiontype = null) {
         // 定義一個快速清理 Session 的小陣列，讓程式碼更簡潔好維護
-        $keys_to_clear = ['error_questions', 'errorqueid', 'renewtest', 'reexamid', 'quenum', 'quetype', 'randvalue'];
+        $keys_to_clear = ['error_questions', 'errorqueid', 'renewtest', 'reexamid', 'quenum', 'quetype', 'randvalue', 'student_id'];
 
         // ----------------------------------------------------------------
         // 情境 1: 完全重置並回到學生首頁
@@ -469,6 +621,11 @@ class QuizModel {
                 if (isset($quetype) && $quetype !== '') {
                     // 【安全防護】過濾題型的特殊字元
                     $_SESSION['quetype'] = htmlspecialchars($quetype, ENT_QUOTES, 'UTF-8');
+                    $has_valid_input = true;
+                }
+
+                if(isset($questiontype) && $questiontype !== '' && $questiontype == "errnewtest"){
+                    $_SESSION['student_id'] = $_SESSION['user_id'];
                     $has_valid_input = true;
                 }
 

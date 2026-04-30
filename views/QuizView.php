@@ -133,6 +133,7 @@
                 <?php foreach ($examData as $index => $data): 
                     $questionSet = $data['questionSet']; ?>
                     <li class="que_op" id="question-block-<?= $index+1;?>">
+                        <div class="d-flex justify-content-end"><span class="info-tag">ch<?php echo htmlspecialchars($questionSet['que_type']); ?></span></div>
                         <div class="text">
                             <?php echo htmlspecialchars($questionSet['content']); ?>
                             <?php if (!empty($questionSet['image_url'])): ?>

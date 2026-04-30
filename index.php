@@ -146,7 +146,7 @@
                 case 'requiz':
                     $checkexamanswerModel =getModel('Quiz');
                     $controller = createController('Quiz',$checkexamanswerModel);
-                    $controller ->requiz($_GET['r']??null,$_GET['examid']??null,$_GET['lastque']??null,$_POST['questionnum']??null,$_POST['quetype']??null);
+                    $controller ->requiz($_GET['r']??null,$_GET['examid']??null,$_GET['lastque']??null,$_POST['questionnum']??null,$_POST['quetype']??null,$_POST['questiontype']??null);
                     break;
                 // 考試頁面
                 case 'quiz':

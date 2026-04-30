@@ -108,7 +108,7 @@
 
         <div class="table-container shadow-sm bg-white p-3 rounded-4">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 mobile-list">
                     <thead class="bg-light">
                         <tr>
                             <th class="border-0 ps-4">學號</th>
@@ -249,7 +249,7 @@
 
         <div class="table-container shadow-sm bg-white p-3 rounded-4">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 mobile-list">
                     <thead class="bg-light text-secondary">
                         <tr>
                             <th class="border-0 ps-4">班級代號</th>
@@ -390,7 +390,7 @@
         
         <div class="table-container shadow-sm bg-white p-3 rounded-4">
             <div class="table-responsive text-start">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 mobile-list">
                     <thead class="bg-light">
                         <tr>
                             <th class="border-0 ps-4">學生姓名</th>
@@ -423,7 +423,7 @@
                                     </tr>';
                                 }
                             } else {
-                                echo '<tr><td colspan="4" class="text-center py-5 text-muted">目前尚無作答紀錄資料</td></tr>';
+                                echo '<tr><td colspan="5" class="text-center py-5 text-muted">目前尚無作答紀錄資料</td></tr>';
                             }
                         ?>
                     </tbody>
@@ -472,6 +472,29 @@
             };
             reader.readAsArrayBuffer(fileInput);
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // 抓取所有的響應式表格
+            const tables = document.querySelectorAll('.mobile-list');
+            
+            tables.forEach(table => {
+                // 抓取表頭文字內容
+                const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+                
+                // 抓取每一行
+                const rows = table.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach((cell, index) => {
+                        // 如果對應的表頭文字存在，就自動填入 data-label
+                        if (headers[index]) {
+                            cell.setAttribute('data-label', headers[index]);
+                        }
+                    });
+                });
+            });
+        });
 </script>
 <?php
         }
