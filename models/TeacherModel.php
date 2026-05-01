@@ -92,6 +92,56 @@ class TeacherModel {
 
     }
 
+    // 資料搜尋
+    public function scshowExamList($p,$sname,$sclass,$sstdid){
+        if (isset($p) && $p === 'student') {
+            $query = "SELECT students.*, stdclass.classname 
+                    FROM students
+                    LEFT JOIN stdclass ON students.class_id = stdclass.classid
+                    WHERE students.name = ? OR stdclass.classname = ? OR students.stdId = ?
+                    ORDER BY students.id ASC";
+            $stmt = $this->db->prepare($query);
+            $stmt->bind_param("sss", $sname, $sclass, $sstdid);
+
+        } else if (isset($p) && $p === 'class') {
+            $query = "SELECT * FROM stdclass";
+            $stmt = $this->db->prepare($query);
+            // 不需要 bind_param，因為沒有外部變數
+
+        } else {
+            // 注意：原本的 WHERE 邏輯中 AND 的優先權高於 OR，建議加上括號 () 以確保邏輯正確
+            $query = "SELECT stdscores.*, students.*, stdclass.* FROM stdscores
+                    JOIN students ON stdscores.student_id = students.id
+                    JOIN stdclass ON stdclass.classid = students.class_id
+                    WHERE CHAR_LENGTH(stdscores.exam_id) = 8 
+                    AND (students.name = ? OR stdclass.classname = ? OR students.stdId = ?)
+                    ORDER BY stdscores.id DESC";
+            $stmt = $this->db->prepare($query);
+            $stmt->bind_param("sss", $sname, $sclass, $sstdid);
+        }
+
+        // 執行並取得結果
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if (!$result) {
+            throw new Exception("Query failed: " . $this->db->error);
+        }
+
+        if ($result->num_rows === 0) {
+            return null; 
+        }
+
+        $ExamList = [];
+        while ($row = $result->fetch_assoc()) {
+            $ExamList[] = $row;
+        }
+
+        $result->free();
+
+        return $ExamList;
+    }
+
     // 顯示修改資料(班級)
     public function geteditclassData($classid) {
         $query = "SELECT * FROM stdclass WHERE classid = ?";

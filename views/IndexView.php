@@ -117,7 +117,7 @@
                     <button type="submit" class="btn btn-outline-success btn-login">登入</button>
                 </div>
                 <div class="d-inline p-2">
-                    <button type="reset" class="btn btn-outline-danger btn-rest">重製</button>
+                    <button type="reset" class="btn btn-outline-danger btn-rest">重置</button>
                 </div>      
             </div>
             

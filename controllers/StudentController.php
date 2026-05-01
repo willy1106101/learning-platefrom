@@ -11,13 +11,16 @@
 
         // 頁面初始化
         public function index() {
-            if (!isset($_SESSION['user_id'])) {
-                header("Location: ./index");
+            if (empty($_SESSION['user_id'])) {
+                header("Location: ./index"); // 通常跳轉回登入頁比 logout 頁更直覺
                 exit;
             }
-
             // 1. 取得基本資料與清單
             $data = $this->model->getUserData($_SESSION['user_id']);
+            if(empty($data)){
+                header("Location: ./logout");
+                exit;
+            }
             $ShowExamQuetypeList = $this->model->getshowexamquetypeData();
             $ShowExamList = $this->model->showExamList();
 

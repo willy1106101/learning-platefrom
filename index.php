@@ -40,6 +40,16 @@
 
         try {
             switch ($url) {
+                case 'search_studentlist':
+                    $TeacherModel = getModel('Teacher');
+                    $controller = createController('Teacher', $TeacherModel);
+                    $controller->index($_POST['name']??'',$_POST['class']??'',$_POST['stdid']??'');
+                    break;
+                case 'search_examlist':
+                    $TeacherModel = getModel('Teacher');
+                    $controller = createController('Teacher', $TeacherModel);
+                    $controller->index($_POST['name']??'',$_POST['class']??'',$_POST['stdid']??'');
+                    break;
                 case 'student_login_check':
                     $IndexModel = getModel('Index');
                     $controller = createController('Index', $IndexModel);
@@ -167,7 +177,7 @@
                 case 'Teacher':
                     $TeacherModel = getModel('Teacher');
                     $controller = createController('Teacher', $TeacherModel);
-                    $controller->index();
+                    $controller->index('','','');
                     break;
                 case 'readquiz':
                 case 'Readquiz':

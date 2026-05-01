@@ -11,15 +11,27 @@
         }
 
         // 頁面初始化
-        public function index() {
-            if (!isset($_SESSION['id'])) {
+        public function index($sname,$sclass,$sstdid) {
+            if (empty($_SESSION['id'])) {
                 header("Location: ./index");
                 exit;
             }
+
             $view = new TeacherView();
 
             $data = $this->model->getUserData($_SESSION['id']);
-            $ShowExamList = $this->model->showExamList($_GET['p']??'');
+            if(empty($data)){
+                header("Location: ./logout"); // 通常跳轉回登入頁比 logout 頁更直覺
+                exit;
+            }
+            // $ShowExamList = $this->model->showExamList($_GET['p']??'');
+
+            // 加入搜尋功能
+            if(isset($sname) && $sname !==''|| isset($sclass) && $sclass !==''|| isset($sstdid) && $sstdid !==''){
+                $ShowExamList = $this->model->scshowExamList(htmlspecialchars($_GET['p']??''),$sname??'',$sclass??'',$sstdid??'');
+            }else{
+                $ShowExamList = $this->model->showExamList(htmlspecialchars($_GET['p']??''));
+            }
 
             // 2. 【新增】抓取每一筆考試的分析報告
             $allReports = [];

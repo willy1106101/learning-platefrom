@@ -106,6 +106,48 @@
             </a>
         </div>
 
+        <div class="from-group">
+            <form action="./search_studentlist?p=<?php echo $_GET['p'];?>" method="post">
+                <div class="card border-0" style="background-color: unset;">
+                    <div class="card-body py-2 row g-2 align-items-center"> 
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted">姓名</span>
+                                <input type="text" class="form-control border-start-0" name="name" list="stuAllname" style="width: 120px;">
+                                <datalist id="stuAllname"></datalist>
+                            </div>
+                        </div>
+                        
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted">班級</span>
+                                <input type="text" class="form-control border-start-0" name="class" list="stuAllscore" style="width: 120px;">
+                                <datalist id="stuAllscore"></datalist>
+                            </div>
+                        </div>
+
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted">學號</span>
+                                <input type="text" class="form-control border-start-0" name="stdid" list="stuAllstdid" style="width: 150px;">
+                                <datalist id="stuAllstdid"></datalist>
+                            </div>
+                        </div>
+
+                        <div class="col-auto ms-auto"> <div class="btn-group btn-group-sm">
+                                <button type="submit" class="btn btn-primary px-3">
+                                    <i class="bi bi-search"></i> 搜尋
+                                </button>
+                                <a class="btn btn-outline-secondary px-3" href="./teacher?p=student">
+                                    清除
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <div class="table-container shadow-sm bg-white p-3 rounded-4">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 mobile-list">
@@ -387,7 +429,47 @@
         <div class="mb-4 d-flex justify-content-between align-items-center text-start">
             <h4 class="fw-bold m-0 text-dark"><i class="bi bi-clipboard-data me-2 text-success"></i>成績管理總覽</h4>
         </div>
-        
+        <div class="from-group">
+            <form action="./search_examlist" method="post">
+                <div class="card border-0" style="background-color: unset;">
+                    <div class="card-body py-2 row g-2 align-items-center"> 
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted">姓名</span>
+                                <input type="text" class="form-control border-start-0" name="name" list="stuAllname" style="width: 120px;">
+                                <datalist id="stuAllname"></datalist>
+                            </div>
+                        </div>
+                        
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted">班級</span>
+                                <input type="text" class="form-control border-start-0" name="class" list="stuAllscore" style="width: 120px;">
+                                <datalist id="stuAllscore"></datalist>
+                            </div>
+                        </div>
+
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted">學號</span>
+                                <input type="text" class="form-control border-start-0" name="stdid" list="stuAllstdid" style="width: 150px;">
+                                <datalist id="stuAllstdid"></datalist>
+                            </div>
+                        </div>
+
+                        <div class="col-auto ms-auto"> <div class="btn-group btn-group-sm">
+                                <button type="submit" class="btn btn-primary px-3">
+                                    <i class="bi bi-search"></i> 搜尋
+                                </button>
+                                <a class="btn btn-outline-secondary px-3" href="./teacher">
+                                    清除
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
         <div class="table-container shadow-sm bg-white p-3 rounded-4">
             <div class="table-responsive text-start">
                 <table class="table table-hover align-middle mb-0 mobile-list">
@@ -495,6 +577,90 @@
                 });
             });
         });
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const tables = document.querySelectorAll(".mobile-list");
+    if (!tables.length) return;
+
+    // 定義輸入框對應
+    const filters = {
+        name: { input: document.querySelector('input[name="name"]'), datalist: document.querySelector("#stuAllname"), attrs: ["學生姓名", "姓名"] },
+        class: { input: document.querySelector('input[name="class"]'), datalist: document.querySelector("#stuAllscore"), attrs: ["學生班級", "班級"] },
+        stdid: { input: document.querySelector('input[name="stdid"]'), datalist: document.querySelector("#stuAllstdid"), attrs: ["學生學號", "學號"] }
+    };
+
+    const dataSets = { name: new Set(), class: new Set(), stdid: new Set() };
+
+    // 1️⃣ 收集資料並填充 Datalist
+    tables.forEach(table => {
+        table.querySelectorAll("tbody tr").forEach(tr => {
+            Object.keys(filters).forEach(key => {
+                const config = filters[key];
+                // 尋找符合 data-label 的 td
+                for (let attr of config.attrs) {
+                    const td = tr.querySelector(`td[data-label="${attr}"]`);
+                    if (td) {
+                        const text = td.textContent.trim();
+                        if (text) dataSets[key].add(text);
+                        break;
+                    }
+                }
+            });
+        });
+    });
+
+    // 渲染 datalist 選項
+    Object.keys(dataSets).forEach(key => {
+        dataSets[key].forEach(val => {
+            const opt = document.createElement("option");
+            opt.value = val;
+            filters[key].datalist.appendChild(opt);
+        });
+    });
+
+    // 2️⃣ 統一篩選邏輯 (多條件交集)
+    const performFilter = () => {
+        const query = {
+            name: filters.name.input.value.trim().toLowerCase(),
+            class: filters.class.input.value.trim().toLowerCase(),
+            stdid: filters.stdid.input.value.trim().toLowerCase()
+        };
+
+        tables.forEach(table => {
+            table.querySelectorAll("tbody tr").forEach(tr => {
+                let isMatch = true;
+
+                // 檢查每一列是否符合所有已輸入的條件
+                Object.keys(filters).forEach(key => {
+                    if (!query[key]) return; // 該欄位沒輸入則跳過檢查
+
+                    let cellText = "";
+                    for (let attr of filters[key].attrs) {
+                        const td = tr.querySelector(`td[data-label="${attr}"]`);
+                        if (td) {
+                            cellText = td.textContent.trim().toLowerCase();
+                            break;
+                        }
+                    }
+                    
+                    if (!cellText.includes(query[key])) {
+                        isMatch = false;
+                    }
+                });
+
+                tr.style.display = isMatch ? "" : "none";
+            });
+        });
+    };
+
+    // 3️⃣ 為所有輸入框綁定事件
+    Object.values(filters).forEach(obj => {
+        obj.input.addEventListener("input", performFilter);
+    });
+});
 </script>
 <?php
         }

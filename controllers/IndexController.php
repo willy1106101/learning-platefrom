@@ -11,11 +11,11 @@
 
         // 已經登入，直接返回管理介面
         public function index() {
-            if(isset($_SESSION['user_id'])){
+            if(isset($_SESSION['user_id']) && $_SESSION['user_id'] !== null){
                 header("Location: ./student");
                 exit;
             }
-            if(isset($_SESSION['id'])){
+            if(isset($_SESSION['id']) && $_SESSION['id'] !== null){
                 header("Location: ./teacher");
                 exit;
             }
@@ -26,12 +26,12 @@
         
         // 已經登入，直接返回管理介面
         public function teacher() {
-            if(isset($_SESSION['id'])){
-                header("Location: ./teacher");
+            if(isset($_SESSION['user_id']) && $_SESSION['user_id'] !== null){
+                header("Location: ./student");
                 exit;
             }
-            if(isset($_SESSION['user_id'])){
-                header("Location: ./student");
+            if(isset($_SESSION['id']) && $_SESSION['id'] !== null){
+                header("Location: ./teacher");
                 exit;
             }
             $data = $this->model->getData();
@@ -46,6 +46,7 @@
                 echo "<h1 class='text-center text-danger'>查無資料!請重新登入~<h1>";
                 echo "<script>setInterval(function(){location.href='./index';},1000);</script>";
                 return;
+                
             }
             if ($username && $password === $user->name) {
                 $_SESSION['user_id'] = $user->id;
@@ -65,7 +66,7 @@
             $user = $this->model->findUserByTeacherUsername($username);
             if ($user === null) {
                 echo "<h1 class='text-center text-danger'>查無資料!請重新登入~<h1>";
-                echo "<script>setInterval(function(){location.href='./index';},1000);</script>";
+                echo "<script>setInterval(function(){location.href='./index?t=teacher';},1000);</script>";
                 return;
             }
             if ($user && $password === $user->password) {

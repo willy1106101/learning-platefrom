@@ -97,7 +97,7 @@
     <nav class="navbar navbar-custom mb-4">
         <div class="container-fluid">
             <span class="fw-bold text-dark">
-                <i class="bi bi-person-circle me-2"></i><?php echo htmlspecialchars($data['name']); ?>
+                <i class="bi bi-person-circle me-2"></i><?php echo htmlspecialchars($data['name']?? ''); ?>
             </span>
             <a href="./logout" class="btn btn-sm btn-outline-danger px-3 rounded-pill">
                 <i class="bi bi-box-arrow-right me-1"></i>登出
