@@ -79,10 +79,11 @@
     .option span { font-size: 1rem; color: #495057; }
 
     /* 圖片美化 */
-    img {
+    .que_op .option li label img, .que_op img {
         border-radius: 8px;
         margin: 15px 0;
-        max-width: 100%;
+        min-width: 10% !important;
+        max-width: 20% !important;
         border: 1px solid #eee;
     }
 
@@ -128,23 +129,27 @@
             </div>
         </div>
 
-        <form method="POST" action="./check_exam_answer" id="examform">
+        <form id="examform">
             <ul class="question_list list-unstyled">
-                <?php foreach ($examData as $index => $data): 
+                <?php
+                    $qstindex= 0;
+                    foreach ($examData as $index => $data): 
                     $questionSet = $data['questionSet']; ?>
-                    <li class="que_op" id="question-block-<?= $index+1;?>">
+                    <li class="que_op">
+                        <?=$index+1;?>
                         <div class="d-flex justify-content-end"><span class="info-tag">ch<?php echo htmlspecialchars($questionSet['que_type']); ?></span></div>
                         <div class="text">
                             <?php echo htmlspecialchars($questionSet['content']); ?>
                             <?php if (!empty($questionSet['image_url'])): ?>
-                                <img src="../../<?php echo htmlspecialchars($questionSet['image_url']); ?>" class="shadow-sm">
+                                <img src="./<?php echo htmlspecialchars($questionSet['image_url']); ?>" class="shadow-sm">
                             <?php endif; ?>
                         </div>
 
                         <ol type="1" class="ps-0">
-                            <?php foreach ($data['questions'] as $questionData): 
+                            <?php foreach ($data['questions'] as $qindex => $questionData): 
                                 $question = $questionData['question']; ?>
-                                <li class="quelist_i">
+                                <li class="quelist_i" id="question-block-<?= $qstindex+1;?>">
+                                    <?php echo 1+$index;?>-<?=$qindex+1;?>
                                     <div class="ques fw-bold"><?php echo htmlspecialchars($question['question_text']); ?></div>
                                     <div class="option">
                                         <ol>
@@ -154,7 +159,7 @@
                                                         <input type="radio" name="answers[<?php echo $question['id']; ?>]" value="<?php echo htmlspecialchars($option['option_letter']); ?>" required>
                                                         <span><?php echo htmlspecialchars($option['option_letter']) . '. ' . htmlspecialchars($option['option_text']); ?></span>
                                                         <?php if (!empty($option['option_image'])): ?>
-                                                            <img src="../../<?php echo htmlspecialchars($option['option_image']); ?>" style="max-width:200px">
+                                                            <img src="./<?php echo htmlspecialchars($option['option_image']); ?>" style="width:100px">
                                                         <?php endif; ?>
                                                     </label>
                                                 </li>
@@ -162,7 +167,7 @@
                                         </ol>
                                     </div>
                                 </li>
-                            <?php endforeach; ?>
+                            <?php $qstindex++; endforeach; ?>
                         </ol>
                     </li>
                 <?php endforeach; ?>
