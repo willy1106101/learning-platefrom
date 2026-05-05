@@ -162,7 +162,15 @@
                     <tbody>
                         <?php
                             if (!empty($showExamList)) {
-                                foreach ($showExamList as $row) {
+                                $items_per_page = 10; 
+                                // 抓取網址上的 ?page=X，沒有的話預設為 1
+                                $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1; 
+                                $offset = ($page - 1) * $items_per_page;
+                                $totalRows = count($showExamList);
+                                $totalPages = ceil($totalRows / $items_per_page);
+                                $offset = ($page - 1) * $items_per_page;
+                                $pageData = array_slice($showExamList, $offset, $items_per_page);
+                                foreach ($pageData as $row) {
                                     echo '<tr>
                                         <td class="ps-4 fw-bold text-primary">'.htmlspecialchars($row['stdId']).'</td>
                                         <td><span class="class-badge bg-light border text-dark px-3 py-1 rounded-pill small">'.htmlspecialchars($row['classname']??"未分配").'</span></td>
@@ -185,6 +193,67 @@
                         ?>
                     </tbody>
                 </table>
+                <!-- ===== 分頁 UI（最多5頁） ===== -->
+                <nav>
+                    <ul class="pagination justify-content-center">
+
+                        <!-- 上一頁 -->
+                        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $page - 1 ?>">上一頁</a>
+                        </li>
+
+                        <?php
+                        $range = 2; // 前後各2頁 → 共5頁
+
+                        $start = max(1, $page - $range);
+                        $end = min($totalPages, $page + $range);
+
+                        // 確保最多顯示5頁
+                        if ($end - $start < 4) {
+                            if ($start == 1) {
+                                $end = min($totalPages, $start + 4);
+                            } elseif ($end == $totalPages) {
+                                $start = max(1, $end - 4);
+                            }
+                        }
+                        ?>
+
+                        <!-- 開頭省略 -->
+                        <?php if ($start > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">1</a>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        <?php endif; ?>
+
+                        <!-- 中間頁碼 -->
+                        <?php for ($i = $start; $i <= $end; $i++): ?>
+                            <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <!-- 結尾省略 -->
+                        <?php if ($end < $totalPages): ?>
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<?= $totalPages ?>">
+                                    <?= $totalPages ?>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+
+                        <!-- 下一頁 -->
+                        <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $page + 1 ?>">下一頁</a>
+                        </li>
+
+                    </ul>
+                </nav>
             </div>
         </div>
 
@@ -302,7 +371,15 @@
                     <tbody>
                         <?php
                             if (!empty($showExamList)) {
-                                foreach ($showExamList as $row) {
+                                $items_per_page = 10; 
+                                // 抓取網址上的 ?page=X，沒有的話預設為 1
+                                $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1; 
+                                $offset = ($page - 1) * $items_per_page;
+                                $totalRows = count($showExamList);
+                                $totalPages = ceil($totalRows / $items_per_page);
+                                $offset = ($page - 1) * $items_per_page;
+                                $pageData = array_slice($showExamList, $offset, $items_per_page);
+                                foreach ($pageData as $row) {
                                     echo '<tr>
                                         <td class="ps-4 fw-bold">'.htmlspecialchars($row['classid']).'</td>
                                         <td class="fw-bold text-dark">' . htmlspecialchars($row['classname']) . '</td>
@@ -318,6 +395,67 @@
                         ?>
                     </tbody>
                 </table>
+                <!-- ===== 分頁 UI（最多5頁） ===== -->
+                <nav>
+                    <ul class="pagination justify-content-center">
+
+                        <!-- 上一頁 -->
+                        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $page - 1 ?>">上一頁</a>
+                        </li>
+
+                        <?php
+                        $range = 2; // 前後各2頁 → 共5頁
+
+                        $start = max(1, $page - $range);
+                        $end = min($totalPages, $page + $range);
+
+                        // 確保最多顯示5頁
+                        if ($end - $start < 4) {
+                            if ($start == 1) {
+                                $end = min($totalPages, $start + 4);
+                            } elseif ($end == $totalPages) {
+                                $start = max(1, $end - 4);
+                            }
+                        }
+                        ?>
+
+                        <!-- 開頭省略 -->
+                        <?php if ($start > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">1</a>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        <?php endif; ?>
+
+                        <!-- 中間頁碼 -->
+                        <?php for ($i = $start; $i <= $end; $i++): ?>
+                            <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <!-- 結尾省略 -->
+                        <?php if ($end < $totalPages): ?>
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<?= $totalPages ?>">
+                                    <?= $totalPages ?>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+
+                        <!-- 下一頁 -->
+                        <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $page + 1 ?>">下一頁</a>
+                        </li>
+
+                    </ul>
+                </nav>
             </div>
         </div>
 
@@ -485,7 +623,16 @@
                     <tbody>
                         <?php
                             if (!empty($showExamList)) {
-                                foreach ($showExamList as $row) {
+
+                                $items_per_page = 10; 
+                                // 抓取網址上的 ?page=X，沒有的話預設為 1
+                                $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1; 
+                                $offset = ($page - 1) * $items_per_page;
+                                $totalRows = count($showExamList);
+                                $totalPages = ceil($totalRows / $items_per_page);
+                                $offset = ($page - 1) * $items_per_page;
+                                $pageData = array_slice($showExamList, $offset, $items_per_page);
+                                foreach ($pageData as $row) {
                                     $eid = $row['exam_id'];
                                     $report = $allReports[$eid] ?? null;
                                     echo '<tr>
@@ -510,6 +657,67 @@
                         ?>
                     </tbody>
                 </table>
+                <!-- ===== 分頁 UI（最多5頁） ===== -->
+                <nav>
+                    <ul class="pagination justify-content-center">
+
+                        <!-- 上一頁 -->
+                        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $page - 1 ?>">上一頁</a>
+                        </li>
+
+                        <?php
+                        $range = 2; // 前後各2頁 → 共5頁
+
+                        $start = max(1, $page - $range);
+                        $end = min($totalPages, $page + $range);
+
+                        // 確保最多顯示5頁
+                        if ($end - $start < 4) {
+                            if ($start == 1) {
+                                $end = min($totalPages, $start + 4);
+                            } elseif ($end == $totalPages) {
+                                $start = max(1, $end - 4);
+                            }
+                        }
+                        ?>
+
+                        <!-- 開頭省略 -->
+                        <?php if ($start > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">1</a>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        <?php endif; ?>
+
+                        <!-- 中間頁碼 -->
+                        <?php for ($i = $start; $i <= $end; $i++): ?>
+                            <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+
+                        <!-- 結尾省略 -->
+                        <?php if ($end < $totalPages): ?>
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<?= $totalPages ?>">
+                                    <?= $totalPages ?>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+
+                        <!-- 下一頁 -->
+                        <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $page + 1 ?>">下一頁</a>
+                        </li>
+
+                    </ul>
+                </nav>
             </div>
         </div>
         <?php } ?>
