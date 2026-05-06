@@ -199,7 +199,7 @@
 
                         <!-- 上一頁 -->
                         <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                            <a class="page-link" href="?page=<?= $page - 1 ?>">上一頁</a>
+                            <a class="page-link" href="?p=student&page=<?= $page - 1 ?>">上一頁</a>
                         </li>
 
                         <?php
@@ -221,7 +221,7 @@
                         <!-- 開頭省略 -->
                         <?php if ($start > 1): ?>
                             <li class="page-item">
-                                <a class="page-link" href="?page=1">1</a>
+                                <a class="page-link" href="?p=student&page=1">1</a>
                             </li>
                             <li class="page-item disabled">
                                 <span class="page-link">...</span>
@@ -231,7 +231,7 @@
                         <!-- 中間頁碼 -->
                         <?php for ($i = $start; $i <= $end; $i++): ?>
                             <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                <a class="page-link" href="?p=student&page=<?= $i ?>"><?= $i ?></a>
                             </li>
                         <?php endfor; ?>
 
@@ -241,7 +241,7 @@
                                 <span class="page-link">...</span>
                             </li>
                             <li class="page-item">
-                                <a class="page-link" href="?page=<?= $totalPages ?>">
+                                <a class="page-link" href="?p=student&page=<?= $totalPages ?>">
                                     <?= $totalPages ?>
                                 </a>
                             </li>
@@ -249,7 +249,7 @@
 
                         <!-- 下一頁 -->
                         <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                            <a class="page-link" href="?page=<?= $page + 1 ?>">下一頁</a>
+                            <a class="page-link" href="?p=student&page=<?= $page + 1 ?>">下一頁</a>
                         </li>
 
                     </ul>
@@ -401,7 +401,7 @@
 
                         <!-- 上一頁 -->
                         <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                            <a class="page-link" href="?page=<?= $page - 1 ?>">上一頁</a>
+                            <a class="page-link" href="?p=class&page=<?= $page - 1 ?>">上一頁</a>
                         </li>
 
                         <?php
@@ -423,7 +423,7 @@
                         <!-- 開頭省略 -->
                         <?php if ($start > 1): ?>
                             <li class="page-item">
-                                <a class="page-link" href="?page=1">1</a>
+                                <a class="page-link" href="?p=class&page=1">1</a>
                             </li>
                             <li class="page-item disabled">
                                 <span class="page-link">...</span>
@@ -433,7 +433,7 @@
                         <!-- 中間頁碼 -->
                         <?php for ($i = $start; $i <= $end; $i++): ?>
                             <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                <a class="page-link" href="?p=class&page=<?= $i ?>"><?= $i ?></a>
                             </li>
                         <?php endfor; ?>
 
@@ -443,7 +443,7 @@
                                 <span class="page-link">...</span>
                             </li>
                             <li class="page-item">
-                                <a class="page-link" href="?page=<?= $totalPages ?>">
+                                <a class="page-link" href="?p=class&page=<?= $totalPages ?>">
                                     <?= $totalPages ?>
                                 </a>
                             </li>
@@ -451,7 +451,7 @@
 
                         <!-- 下一頁 -->
                         <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                            <a class="page-link" href="?page=<?= $page + 1 ?>">下一頁</a>
+                            <a class="page-link" href="?p=class&page=<?= $page + 1 ?>">下一頁</a>
                         </li>
 
                     </ul>
